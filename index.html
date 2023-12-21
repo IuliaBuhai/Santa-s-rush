@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Santa's Rush</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <style>
+        body {
+            background-color: #122219;
+            font-family: garamond;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin-left: 10%;
+            margin-right: 10%;
+        }
+
+        h1 {
+            color: #e74c3c;
+            text-align: center;
+            padding: 20px;
+            font-size: 3em;
+            z-index: 2;
+            text-shadow: 1px 1px 2px rgb(232, 228, 183), 0 0 1em rgb(45, 77, 48), 0 0 0.2em #f3f7ba;
+        }
+        h2, ul{
+            color:#c0c0c0;
+            text-align: center;
+
+        }
+
+        p {
+            color: #f9f0f0;
+            text-align: center;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            z-index: 6;
+        }
+
+        .game-container {
+            margin-left: 300px;
+            padding-bottom: 40px;
+            z-index: 20;
+        }
+
+        canvas {
+            border: 5px solid #2c3e50;
+            border-radius: 10px;
+        }
+        /*// snow animatioon : https://codepen.io/ethancopping/pen/ExrGYGG*/
+        .lightrope {
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            position: fixed;
+            top: -15px;
+            z-index: 0;
+            padding: 0;
+            pointer-events: none;
+            width: 100%;
+        }
+
+        .lightrope li {
+            position: relative;
+            -webkit-animation-fill-mode: both;
+            animation-fill-mode: both;
+            -webkit-animation-iteration-count: infinite;
+            animation-iteration-count: infinite;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: block;
+            width: 12px;
+            height: 28px;
+            border-radius: 50%;
+            margin: 20px;
+            display: inline-block;
+            background: #bf1818;
+            box-shadow: 0px 4.6666666667px 24px 3px #bf1818;
+            -webkit-animation-name: flash-1;
+            animation-name: flash-1;
+            -webkit-animation-duration: 2s;
+            animation-duration: 2s;
+        }
+
+        .lightrope li:nth-child(2n+1) {
+            background: #379173;
+            box-shadow: 0px 4.6666666667px 24px 3px rgba(55, 145, 115, 0.5);
+            -webkit-animation-name: flash-2;
+            animation-name: flash-2;
+            -webkit-animation-duration: 0.4s;
+            animation-duration: 0.4s;
+        }
+
+        .lightrope li:nth-child(4n+2) {
+            background: #f3f7ba;
+            box-shadow: 0px 4.6666666667px 24px 3px #f3f7ba;
+            -webkit-animation-name: flash-3;
+            animation-name: flash-3;
+            -webkit-animation-duration: 1.1s;
+            animation-duration: 1.1s;
+        }
+
+        .lightrope li:nth-child(odd) {
+            -webkit-animation-duration: 1.8s;
+            animation-duration: 1.8s;
+        }
+
+        .lightrope li:nth-child(3n+1) {
+            -webkit-animation-duration: 1.4s;
+            animation-duration: 1.4s;
+        }
+
+        .lightrope li:before {
+            content: "";
+            position: absolute;
+            background: #222;
+            width: 10px;
+            height: 9.3333333333px;
+            border-radius: 3px;
+            top: -4.6666666667px;
+            left: 1px;
+        }
+
+        .lightrope li:after {
+            content: "";
+            top: -14px;
+            left: 9px;
+            position: absolute;
+            width: 52px;
+            height: 18.6666666667px;
+            border-bottom: solid #222 2px;
+            border-radius: 50%;
+        }
+
+        .lightrope li:last-child:after {
+            content: none;
+        }
+
+        .lightrope li:first-child {
+            margin-left: -40px;
+        }
+
+        @-webkit-keyframes flash-1 {
+            0%, 100% {
+                background: #bf1818;
+                box-shadow: 0px 4.6666666667px 24px 3px #bf1818;
+            }
+            50% {
+                background: rgba(191, 24, 24, 0.4);
+                box-shadow: 0px 4.6666666667px 24px 3px rgba(191, 24, 24, 0.2);
+            }
+        }
+
+        @keyframes flash-1 {
+            0%, 100% {
+                background: #bf1818;
+                box-shadow: 0px 4.6666666667px 24px 3px #bf1818;
+            }
+            50% {
+                background: rgba(191, 24, 24, 0.4);
+                box-shadow: 0px 4.6666666667px 24px 3px rgba(191, 24, 24, 0.2);
+            }
+        }
+
+        @-webkit-keyframes flash-2 {
+            0%, 100% {
+                background: #379173;
+                box-shadow: 0px 4.6666666667px 24px 3px #379173;
+            }
+            50% {
+                background: rgba(55, 145, 115, 0.4);
+                box-shadow: 0px 4.6666666667px 24px 3px rgba(55, 145, 115, 0.2);
+            }
+        }
+
+        @keyframes flash-2 {
+            0%, 100% {
+                background: #379173;
+                box-shadow: 0px 4.6666666667px 24px 3px #379173;
+            }
+            50% {
+                background: rgba(55, 145, 115, 0.4);
+                box-shadow: 0px 4.6666666667px 24px 3px rgba(55, 145, 115, 0.2);
+            }
+        }
+
+        @-webkit-keyframes flash-3 {
+            0%, 100% {
+                background: #f3f7ba;
+                box-shadow: 0px 4.6666666667px 24px 3px #f3f7ba;
+            }
+            50% {
+                background: rgba(243, 247, 186, 0.4);
+                box-shadow: 0px 4.6666666667px 24px 3px rgba(243, 247, 186, 0.2);
+            }
+        }
+
+        @keyframes flash-3 {
+            0%, 100% {
+                background: #f3f7ba;
+                box-shadow: 0px 4.6666666667px 24px 3px #f3f7ba;
+            }
+            50% {
+                background: rgba(243, 247, 186, 0.4);
+                box-shadow: 0px 4.6666666667px 24px 3px rgba(243, 247, 186, 0.2);
+            }
+        }
+        .snow-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    z-index: 99999;
+    pointer-events: none;
+}
+
+.snowflake {
+    position: absolute;
+    background-color: white;
+    border-radius: 50%;
+    opacity: 0.8;
+    pointer-events: none;
+}
+
+@keyframes fall {
+    0% {
+        opacity: 0;
+        transform: translateY(0);
+    }
+    10% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.5;
+        transform: translateY(100vh);
+    }
+}
+
+@keyframes diagonal-fall {
+    0% {
+        opacity: 0;
+        transform: translate(0, 0);
+    }
+    10% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.25;
+        transform: translate(10vw, 100vh);
+    }
+}
+
+    </style>
+</head>
+
+<body>
+    <div class="snow-container"></div>
+
+    <ul class="lightrope">
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+
+        <!-- Add more li elements as needed -->
+    </ul>
+    <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+    <h1>Santa's Rush</h1>
+    <p>Welcome to "Santa's Rush," an enchanting holiday platformer that brings festive joy to your screen! Join Santa on
+        his quest to spread cheer, collect gifts, and navigate snowy platforms in this heartwarming and challenging
+        game.</p>
+
+    <h2>Overview:</h2>
+    <p>Embark on a delightful journey with Santa as he leaps through snowy landscapes, avoiding hazards, and gathering
+        gifts to make Christmas extra special. The game unfolds across multiple levels, each more enchanting than
+        the last.</p>
+
+    <h2>Gameplay:</h2>
+    <ul>
+        <li>Use the arrow keys to guide Santa through the winter wonderland.</li>
+        <li>Jump over hazards and skillfully navigate icy platforms.</li>
+        <li>Collect the required number of gifts to advance to the next level.</li>
+    </ul>
+
+    <h2>Features:</h2>
+    <ul>
+        <li>Captivating Festive Atmosphere: Immerse yourself in the holiday spirit with cheerful graphics and a
+            festive soundtrack.</li>
+        <li>Challenging Levels: Progress through increasingly challenging levels as you help Santa on his
+            gift-collecting mission.</li>
+        <li>Dynamic Animation: Enjoy smooth animations and lively character movements that bring Santa to life.</li>
+        <li>Random Platform Generation: Experience a unique challenge each time you play, as platforms are randomly
+            generated for added excitement.</li>
+        <li>Level Restart Option: If you find a level too challenging, restart and witness a fresh arrangement of
+            platforms, creating a new adventure every time.</li>
+    </ul>
+
+    <h2>Objectives:</h2>
+    <p>Your mission is to help Santa collect gifts and overcome obstacles. Can you reach the highest level and make
+        Christmas joyous for everyone?</p>
+
+    <h2>How to Play:</h2>
+    <ul>
+        <li>Press SPACE to start the game.</li>
+        <li>Use the arrow keys to control Santa's movements.</li>
+        <li>Jump over hazards and collect gifts to progress through levels.</li>
+    </ul>
+
+    <div class="game-container">
+        
+
+        <script>
+// snow animatioon : https://codepen.io/ethancopping/pen/ExrGYGG
+document.addEventListener("DOMContentLoaded", function () {
+    const snowContainer = document.querySelector(".snow-container");
+
+    const particlesPerThousandPixels = 0.1;
+    const fallSpeed = 1.25;
+    const pauseWhenNotActive = true;
+    const maxSnowflakes = 200;
+    const snowflakes = [];
+
+    let snowflakeInterval;
+    let isTabActive = true;
+
+    function resetSnowflake(snowflake) {
+        const size = Math.random() * 5 + 1;
+        const viewportWidth = window.innerWidth - size; // Adjust for snowflake size
+        const viewportHeight = window.innerHeight;
+
+        snowflake.style.width = `${size}px`;
+        snowflake.style.height = `${size}px`;
+        snowflake.style.left = `${Math.random() * viewportWidth}px`; // Constrain within viewport width
+        snowflake.style.top = `-${size}px`;
+
+        const animationDuration = (Math.random() * 3 + 2) / fallSpeed;
+        snowflake.style.animationDuration = `${animationDuration}s`;
+        snowflake.style.animationTimingFunction = "linear";
+        snowflake.style.animationName =
+            Math.random() < 0.5 ? "fall" : "diagonal-fall";
+
+        setTimeout(() => {
+            if (parseInt(snowflake.style.top, 10) < viewportHeight) {
+                resetSnowflake(snowflake);
+            } else {
+                snowflake.remove(); // Remove when it goes off the bottom edge
+            }
+        }, animationDuration * 1000);
+    }
+
+    function createSnowflake() {
+        if (snowflakes.length < maxSnowflakes) {
+            const snowflake = document.createElement("div");
+            snowflake.classList.add("snowflake");
+            snowflakes.push(snowflake);
+            snowContainer.appendChild(snowflake);
+            resetSnowflake(snowflake);
+        }
+    }
+
+    function generateSnowflakes() {
+        const numberOfParticles =
+            Math.ceil((window.innerWidth * window.innerHeight) / 1000) *
+            particlesPerThousandPixels;
+        const interval = 5000 / numberOfParticles;
+
+        clearInterval(snowflakeInterval);
+        snowflakeInterval = setInterval(() => {
+            if (isTabActive && snowflakes.length < maxSnowflakes) {
+                requestAnimationFrame(createSnowflake);
+            }
+        }, interval);
+    }
+
+    function handleVisibilityChange() {
+        if (!pauseWhenNotActive) return;
+
+        isTabActive = !document.hidden;
+        if (isTabActive) {
+            generateSnowflakes();
+        } else {
+            clearInterval(snowflakeInterval);
+        }
+    }
+
+    generateSnowflakes();
+
+    window.addEventListener("resize", () => {
+        clearInterval(snowflakeInterval);
+        setTimeout(generateSnowflakes, 1000);
+    });
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+});
+
+
+             window.onload = function () {
+            window.scrollTo(0, 0);
+        };
+            var gameState = 'playing'; 
+            var config = {
+                type: Phaser.AUTO,
+                width: 1000,
+                height: 553,
+                physics: {
+                    default: 'arcade',
+                    arcade: {
+                        gravity: {
+                            y: 300,
+                        },
+                        debug: false,
+                    }
+                },
+                scene: {
+                    preload: preload,
+                    create: create,
+                    update: update,
+                }
+            };
+
+            var game = new Phaser.Game(config);
+            var platforms;
+            var player;
+            var cursors;
+            var gifts;
+            var hazards;
+            var collectedGifts = 0;
+            var collectedGiftsText;
+            var levelText; // Added level text
+            var currentLevel = 1;
+            var restartButton;
+
+            var openingScene = {
+                preload: function () {
+                    this.load.image('logo', 'assets/back-screen.png');
+                    this.load.image('sleight', 'assets/sleight.png"');
+                },
+                create: function () {
+                    this.add.image(400, 300, 'sleight').setOrigin(0.4, 0.5);
+                    
+                    
+
+                    // Add a start message
+                    this.add.text(500, 400, 'Press SPACE to start', {
+                        fontSize: '48px',
+                        color: '#ffffff',
+                    }).setOrigin(0.5);
+
+                    // Set up keyboard input to start the game
+                    this.input.keyboard.on('keydown-SPACE', function () {
+                        this.scene.start('main');
+                    }, this);
+                }
+            };
+
+                var endingScene = {
+        preload: function () {
+            this.load.image('logo', 'assets/back-screen.jpg');
+        },
+        create: function () {
+            this.add.image(400, 300, 'backSets');  // Change 'sleight' to 'backSets' if needed
+            this.add.text(400, 300, 'You won! Congratulations!!!', {
+                fontSize: '48px',
+                fill: '#000000'
+            }).setOrigin(0.3);
+
+        
+        
+        }
+    };
+
+            function preload() {
+                this.load.image('sleight', 'assets/open.png');
+                
+                this.load.image('snow', 'assets/platforms.png');
+                this.load.spritesheet('santa', 'assets/santa.png', {
+                    frameWidth: 64,
+                    frameHeight: 96
+                });
+                this.load.image('gift', 'assets/giftscoll.png');
+                this.load.image('backSets', 'assets/tree.png');
+                this.load.image('restartButton', 'assets/restart_button.png');
+                this.load.image('hazard', 'assets/hazard.png');
+                this.load.image('logo', 'assets/back-screen.png');
+            }
+
+            var mainScene = {
+                preload: preload,
+                create: create,
+                update: update,
+            };
+
+            function create() {
+                this.scene.add('opening', openingScene, true);
+                this.physics.world.setBounds(0, 0, 800, 600);
+                this.add.image(450, 250, 'backSets');
+
+                platforms = this.physics.add.staticGroup();
+                generatePlatforms(currentLevel);
+
+                gifts = this.physics.add.group({
+                    key: 'gift',
+                    repeat: 2,
+                    setXY: {
+                        x: 100,
+                        y: 0,
+                        stepX: 300
+                    }
+                });
+
+                this.physics.add.collider(platforms, gifts);
+
+                gifts.children.iterate(function (child) {
+                    child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+                    child.setScale(0.1);
+                });
+
+                hazards = this.physics.add.group();
+
+                this.time.addEvent({
+                    delay: 3000,
+                    callback: spawnHazard,
+                    callbackScope: this,
+                    loop: true
+                });
+
+                player = this.physics.add.sprite(100, 350, 'santa');
+                player.setScale(0.6, 0.6);
+
+                this.physics.add.collider(player, platforms);
+                this.physics.add.overlap(player, gifts, collectGift, null, this);
+
+                cursors = this.input.keyboard.createCursorKeys();
+
+                this.anims.create({
+                    key: 'left',
+                    frames: this.anims.generateFrameNumbers('santa', {
+                        start: 0,
+                        end: 3
+                    }),
+                    frameRate: 10,
+                    repeat: -1
+                });
+
+                this.anims.create({
+                    key: 'turn',
+                    frames: [{
+                        key: 'santa',
+                        frame: 4
+                    }],
+                    frameRate: 20
+                });
+
+                this.anims.create({
+                    key: 'right',
+                    frames: this.anims.generateFrameNumbers('santa', {
+                        start: 5,
+                        end: 8
+                    }),
+                    frameRate: 10,
+                    repeat: -1
+                });
+
+                collectedGiftsText = this.add.text(16, 16, 'Collected Gifts: 0', {
+                    fontSize: '32px',
+                    color: '#ffffff'
+                });
+
+                // Display level text
+                levelText = this.add.text(800, 16, 'Level: ' + currentLevel, {
+                    fontSize: '32px',
+                    color: '#ffffff'
+                });
+
+                restartButton = this.add.image(850, 120, 'restartButton').setInteractive();
+                restartButton.setScale(0.3);
+                restartButton.on('pointerdown', function () {
+                    restartLevel();
+                });
+            }
+
+            function update() {
+            if (gameState === 'playing') {
+                // Only update game logic if the game is still in progress
+
+                if (cursors.left.isDown) {
+                    player.setVelocityX(-160);
+                    player.anims.play('left', true);
+                } else if (cursors.right.isDown) {
+                    player.setVelocityX(160);
+                    player.anims.play('right', true);
+                } else {
+                    player.setVelocityX(0);
+                    player.anims.play('turn');
+                }
+
+                if (cursors.up.isDown && player.body.touching.down) {
+                    player.setVelocityY(-330);
+                }
+            }
+        }
+
+            function collectGift(player, gift) {
+                gift.disableBody(true, true);
+                collectedGifts++;
+                collectedGiftsText.setText('Collected Gifts: ' + collectedGifts);
+
+                if (collectedGifts === 3) {
+                    currentLevel++;
+                    collectedGifts = 0;
+                    collectedGiftsText.setText('Collected Gifts: ' + collectedGifts);
+
+                    // Update level text
+                    levelText.setText('Level: ' + currentLevel);
+
+                    if (currentLevel >= 10) {
+                        endGame();
+                    } else {
+                        restartLevel();
+                    }
+                }
+            }
+
+            
+                function generatePlatforms(level) {
+    platforms.clear(true, true); // Clear existing platforms
+
+    platforms.create(400, 568, 'snow').setScale(3).refreshBody();
+
+    var numPlatforms = 3 + level * 2;
+    var offsetY = 0; // Initialize the offset for each level
+
+    for (var i = 0; i < numPlatforms; i++) {
+        var x = Phaser.Math.Between(50, 750);
+        var y = Phaser.Math.Between(100, 500);
+        var scale = 1 - level * 0.1;
+
+        if (i > 0) {
+            var prevPlatform = platforms.getChildren()[platforms.getChildren().length - 1];
+            var distance = Phaser.Math.Distance.Between(x, y, prevPlatform.x, prevPlatform.y);
+            while (distance < 150) {
+                x = Phaser.Math.Between(50, 750);
+                y = Phaser.Math.Between(100, 500);
+                distance = Phaser.Math.Distance.Between(x, y, prevPlatform.x, prevPlatform.y);
+            }
+        }
+
+        var platform = platforms.create(x, y - offsetY, 'snow');
+        platform.displayWidth = platform.width * scale;
+        
+        platform.scaleY = 1;
+
+        // Calculate the offset based on the scale and position
+        var offsetX = (platform.width - platform.displayWidth) / 2;
+        platform.body.setSize(platform.displayWidth, platform.height, true);
+        platform.body.setOffset(offsetX, 0);
+
+        platform.alpha = 0.5;
+
+        // Update the offsetY for the next platform
+        offsetY += platform.height;
+    }
+}
+
+
+
+
+            function spawnHazard() {
+                var hazardY = player.y;
+                var hazard = hazards.create(0, hazardY, 'hazard');
+                hazard.setVelocityX(300);
+
+                this.physics.add.collider(player, hazard, handleHazardCollision, null, this);
+            }
+
+            function handleHazardCollision(player, hazard) {
+                restartLevel();
+            }
+
+            function resetGifts() {
+                gifts.children.iterate(function (child) {
+                    child.enableBody(true, child.x, child.y, true, true);
+                });
+            }
+
+            function restartLevel() {
+                collectedGifts = 0;
+                collectedGiftsText.setText('Collected Gifts: ' + collectedGifts);
+
+                platforms.clear(true, true);
+                generatePlatforms(currentLevel);
+
+                player.setX(100);
+                player.setY(350);
+                gifts.setY(0);
+
+                resetGifts();
+            }
+
+            
+                    function endGame() {
+            // Disable the player and remove other elements
+            player.disableBody(true, true);
+            platforms.clear(true, true);
+            hazards.clear(true, true);
+            gifts.clear(true, true);
+
+            // Hide the game container
+            var gameContainer = document.querySelector('.game-container');
+            gameContainer.style.opacity = '0';
+            gameContainer.style.pointerEvents = 'none';
+
+            // Start the ending scene
+            game.scene.add('ending', endingScene, true);
+        }
+
+        function restartGame() {
+            // Reset any necessary game state
+            currentLevel = 1;
+
+            // Restart the main scene
+            game.scene.start('main');
+        }
+        </script>
+        
+    </div>
+    
+    
+</body>
+

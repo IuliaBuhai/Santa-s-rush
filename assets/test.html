@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phaser Game with 3 Levels</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js"></script>
+</head>
+<body>
+
+<script>
+    var config = {
+        type: Phaser.AUTO,
+        width: 800,
+        height: 600,
+        physics: {
+            default: 'arcade',
+            arcade: {
+                gravity: { y: 300 },
+                debug: false
+            }
+        },
+        scene: {
+            preload: preload,
+            create: create,
+            update: update
+        }
+    };
+
+    var game = new Phaser.Game(config);
+    var currentLevel = 1;
+    var player;
+
+    function preload() {
+        this.load.image('background', 'assets/logo.png');
+        this.load.image('player', 'assets/player.png');
+        this.load.image('platform', 'assets/platform.png');
+        this.load.image('finish', 'assets/finish.png');
+    }
+
+    function create() {
+        this.add.image(400, 300, 'background');
+
+        // Create player
+        player = this.physics.add.sprite(50, 450, 'player');
+        player.setCollideWorldBounds(true);
+
+        // Create platforms for level 1
+        createPlatforms(this, currentLevel);
+
+        // Create finish line
+        createFinish(this, currentLevel);
+        
+        // Enable physics for player and platforms
+        this.physics.world.enable([player, platforms]);
+
+        // Collide player with platforms
+        this.physics.add.collider(player, platforms);
+
+        // Overlap with finish line
+        this.physics.add.overlap(player, finish, advanceToNextLevel, null, this);
+    }
+
+    function update() {
+        // Player movement
+        var cursors = this.input.keyboard.createCursorKeys();
+
+        if (cursors.left.isDown) {
+            player.setVelocityX(-160);
+        }
+        else if (cursors.right.isDown) {
+            player.setVelocityX(160);
+        }
+        else {
+            player.setVelocityX(0);
+        }
+
+        if (cursors.up.isDown && player.body.touching.down) {
+            player.setVelocityY(-330);
+        }
+    }
+
+    function createPlatforms(scene, level) {
+        platforms = scene.physics.add.staticGroup();
+
+        // Platform creation for each level
+        if (level === 1) {
+            platforms.create(400, 568, 'platform').setScale(2).refreshBody();
+            platforms.create(600, 400, 'platform');
+            platforms.create(50, 250, 'platform');
+            platforms.create(750, 220, 'platform');
+        } else if (level === 2) {
+            platforms.create(400, 568, 'platform').setScale(2).refreshBody();
+            platforms.create(200, 400, 'platform');
+            platforms.create(600, 300, 'platform');
+            platforms.create(50, 200, 'platform');
+            platforms.create(750, 180, 'platform');
+        } else if (level === 3) {
+            platforms.create(400, 568, 'platform').setScale(2).refreshBody();
+            platforms.create(200, 450, 'platform');
+            platforms.create(600, 350, 'platform');
+            platforms.create(50, 300, 'platform');
+            platforms.create(750, 250, 'platform');
+        }
+    }
+
+    function createFinish(scene, level) {
+        finish = scene.physics.add.sprite(750, 150, 'finish');
+    }
+
+    function advanceToNextLevel(player, finish) {
+        // When player reaches the finish line, advance to the next level
+        currentLevel++;
+
+        if (currentLevel <= 3) {
+            // Restart the scene with the new level
+            this.scene.restart();
+            createPlatforms(this, currentLevel);
+            createFinish(this, currentLevel);
+        } else {
+            // All levels completed
+            console.log("Game completed!");
+        }
+    }
+</script>
+
+</body>
+</html>
